@@ -1,8 +1,11 @@
 #!/usr/bin/python3
-"""docstring for Square"""
+""" Defining a class square """
 
 
 class Square:
-    """docstring for init"""
+    """ Defining a class square """
     def __init__(self, size):
-        self.__size = 
+        """ Initializing a square class
+        Args: size: size of the square
+         """
+        self.__size = size
