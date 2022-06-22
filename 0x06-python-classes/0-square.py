@@ -1,7 +1,8 @@
 #!/usr/bin/python3
-"""Defines a class Square"""
+"""docstring for Square"""
 
 
 class Square:
-    """An empty Square class"""
-    pass
+    """docstring for init"""
+    def __init__(self):
+        pass
