@@ -1,80 +1,86 @@
 #!/usr/bin/python3
-# 101-nqueens.py
 
-"""The n queens puzzle."""
-class NQueens:
-    """Generate all valid solutions for the n queens puzzle"""
+
+class QueenChessBoard:
     def __init__(self, size):
-        # Store the puzzle (problem) size and the number of valid solutions
         self.size = size
-        self.solutions = 0
-        self.solve()
+        self.columns = []
 
-    def solve(self):
-        """Solve the n queens puzzle and print the number of solutions"""
-        positions = [-1] * self.size
-        self.put_queen(positions, 0)
-        print("Found", self.solutions, "solutions.")
+    def place_in_next_row(self, column):
+        self.columns.append(column)
 
-    def put_queen(self, positions, target_row):
-        """
-        Try to place a queen on target_row by checking all N possible cases.
-        If a valid place is found the function calls itself trying to place a queen
-        on the next row until all N queens are placed on the NxN board.
-        """
-        # Base (stop) case - all N rows are occupied
-        if target_row == self.size:
-            self.show_full_board(positions)
-            # self.show_short_board(positions)
-            self.solutions += 1
-        else:
-            # For all N columns positions try to place a queen
-            for column in range(self.size):
-                # Reject all invalid positions
-                if self.check_place(positions, target_row, column):
-                    positions[target_row] = column
-                    self.put_queen(positions, target_row + 1)
+    def remove_in_current_row(self):
+        return self.columns.pop()
 
-
-    def check_place(self, positions, ocuppied_rows, column):
-        """
-        Check if a given position is under attack from any of
-        the previously placed queens (check column and diagonal positions)
-        """
-        for i in range(ocuppied_rows):
-            if positions[i] == column or \
-                positions[i] - i == column - ocuppied_rows or \
-                positions[i] + i == column + ocuppied_rows:
-
+    def is_this_column_safe_in_next_row(self, column):
+        row = len(self.columns)
+        for queen_column in self.columns:
+            if column == queen_column:
                 return False
+
+        for queen_row, queen_column in enumerate(self.columns):
+            if queen_column - queen_row == column - row:
+                return False
+
+        for queen_row, queen_column in enumerate(self.columns):
+            if ((self.size - queen_column) - queen_row ==
+               (self.size - column) - row):
+                return False
+
         return True
 
-    def show_full_board(self, positions):
-        """Show the full NxN board"""
+    def display(self):
+        lista = []
         for row in range(self.size):
-            line = ""
             for column in range(self.size):
-                if positions[row] == column:
-                    line += "Q "
-                else:
-                    line += ". "
-            print(line)
-        print("\n")
+                if column == self.columns[row]:
+                    lista.append([row, column])
+        print(lista, end='')
 
-    def show_short_board(self, positions):
-        """
-        Show the queens positions on the board in compressed form,
-        each number represent the occupied column position in the corresponding row.
-        """
-        line = ""
-        for i in range(self.size):
-            line += str(positions[i]) + " "
-        print(line)
 
-def main():
-    """Initialize and solve the n queens puzzle"""
-    NQueens(8)
+def solve_queen(size):
+    board = QueenChessBoard(size)
+    number_of_solutions = 0
+    row = 0
+    column = 0
+
+    while True:
+        while column < size:
+            if board.is_this_column_safe_in_next_row(column):
+                board.place_in_next_row(column)
+                row += 1
+                column = 0
+                break
+            else:
+                column += 1
+
+        if (column == size or row == size):
+            if row == size:
+                board.display()
+                print()
+                number_of_solutions += 1
+                board.remove_in_current_row()
+                row -= 1
+
+            try:
+                prev_column = board.remove_in_current_row()
+            except IndexError:
+                break
+
+            row -= 1
+            column = 1 + prev_column
 
 if __name__ == "__main__":
-    # execute only if run as a script
-    main()
+    import sys
+
+    if len(sys.argv) != 2:
+        print("Usage: nqueens N")
+        sys.exit(1)
+    if sys.argv[1].isdigit() is False:
+        print("N must be a number")
+        sys.exit(1)
+    if int(sys.argv[1]) < 4:
+        print("N must be at least 4")
+        sys.exit(1)
+
+    solve_queen(int(sys.argv[1]))
