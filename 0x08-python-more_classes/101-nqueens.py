@@ -1,74 +1,45 @@
 #!/usr/bin/python3
+'''N Queens Problem'''
 
 
-class QueenChessBoard:
-    def __init__(self, size):
-        self.size = size
-        self.columns = []
-
-    def place_in_next_row(self, column):
-        self.columns.append(column)
-
-    def remove_in_current_row(self):
-        return self.columns.pop()
-
-    def is_this_column_safe_in_next_row(self, column):
-        row = len(self.columns)
-        for queen_column in self.columns:
-            if column == queen_column:
-                return False
-
-        for queen_row, queen_column in enumerate(self.columns):
-            if queen_column - queen_row == column - row:
-                return False
-
-        for queen_row, queen_column in enumerate(self.columns):
-            if ((self.size - queen_column) - queen_row ==
-               (self.size - column) - row):
-                return False
-
-        return True
-
-    def display(self):
-        lista = []
-        for row in range(self.size):
-            for column in range(self.size):
-                if column == self.columns[row]:
-                    lista.append([row, column])
-        print(lista, end='')
+def validation(chessboard, row, column):
+    '''validates current position to see if its available
+       vs the queens already set on the columns to the left.
+    Args:
+        chessboard: actual state of the game.
+        row: row to validate.
+        column: column to validate.
+    '''
+    for col in range(column):
+        # checks if there is no queen in the row or diagonal
+        if (chessboard[col] == row or
+                # checks the slope:
+                abs(col - column) == abs(chessboard[col] - row)):
+            return False
+    return True
 
 
-def solve_queen(size):
-    board = QueenChessBoard(size)
-    number_of_solutions = 0
-    row = 0
-    column = 0
+def backtracking(chessboard, column):
+    '''backtracking application.
+    Args:
+        chessboard: actual state of the game.
+        column: the colum to backtrack,
+    '''
+    q = len(chessboard)
+    # when all the queens are set and the validation is True,
+    # prints the solution
+    if column == q:
+        solution = []
+        for col in range(q):
+            solution.append([col, chessboard[col]])
+        print(solution)
+        return
 
-    while True:
-        while column < size:
-            if board.is_this_column_safe_in_next_row(column):
-                board.place_in_next_row(column)
-                row += 1
-                column = 0
-                break
-            else:
-                column += 1
-
-        if (column == size or row == size):
-            if row == size:
-                board.display()
-                print()
-                number_of_solutions += 1
-                board.remove_in_current_row()
-                row -= 1
-
-            try:
-                prev_column = board.remove_in_current_row()
-            except IndexError:
-                break
-
-            row -= 1
-            column = 1 + prev_column
+    for row in range(q):
+        # if validation is True, a new queen is set and start to test a new one
+        if validation(chessboard, row, column):
+            chessboard[column] = row
+            backtracking(chessboard, column + 1)
 
 if __name__ == "__main__":
     import sys
@@ -76,11 +47,19 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: nqueens N")
         sys.exit(1)
-    if sys.argv[1].isdigit() is False:
+    q = 0
+    try:
+        q = int(sys.argv[1])
+    except:
         print("N must be a number")
         sys.exit(1)
-    if int(sys.argv[1]) < 4:
+    if q < 4:
         print("N must be at least 4")
         sys.exit(1)
 
-    solve_queen(int(sys.argv[1]))
+    # Creation of the chessboard
+    chessboard = []
+    for col in range(q):
+        chessboard.append(col)
+    # starts the seeking of the solution in the first column
+    backtracking(chessboard, 0)
